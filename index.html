@@ -1597,5 +1597,57 @@ function init(){
 init();
 })();
 </script>
+<script>
+/* ===== 自动图片压缩（拦截所有上传，自动缩小到 1000px） ===== */
+(function(){
+  var orig = FileReader.prototype.readAsDataURL;
+  FileReader.prototype.readAsDataURL = function(file){
+    var reader = this;
+    if(!file || !file.type || file.type.indexOf('image/') !== 0 || file.size < 60*1024){
+      return orig.call(reader, file);
+    }
+    var isPng = file.type === 'image/png';
+    var img = new Image();
+    var url = URL.createObjectURL(file);
+    img.onload = function(){
+      var max = 1000;
+      var w = img.naturalWidth, h = img.naturalHeight;
+      if(w > max || h > max){
+        var r = Math.min(max/w, max/h);
+        w = Math.round(w * r);
+        h = Math.round(h * r);
+      }
+      var c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      var out = isPng ? c.toDataURL('image/png') : c.toDataURL('image/jpeg', 0.82);
+      URL.revokeObjectURL(url);
+      try{ Object.defineProperty(reader, 'result', { value: out }); }catch(e){}
+      if(typeof reader.onload === 'function') reader.onload({ target: reader });
+    };
+    img.onerror = function(){
+      URL.revokeObjectURL(url);
+      orig.call(reader, file);
+    };
+    img.src = url;
+  };
+})();
+</script>
+<script>
+/* 把星号 ☆ 改成"上传字体文件"按钮 —— 一劳永逸版 */
+(function(){
+  function swap(starId, fileId){
+    var old = document.getElementById(starId);
+    var fileInput = document.getElementById(fileId);
+    if(!old || !fileInput) return;
+    var fresh = old.cloneNode(true);     // 复制出新节点（不带旧事件）
+    fresh.title = '上传字体文件';
+    fresh.addEventListener('click', function(){ fileInput.click(); });
+    old.parentNode.replaceChild(fresh, old);
+  }
+  swap('uiFontStarBtn', 'uiFontFile');
+  swap('editorFontStarBtn', 'editorFontFile');
+})();
+</script>
 </body>
 </html>
