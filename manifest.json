@@ -1,0 +1,14 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Hello",
+  "orientation": "portrait",
+  "scope": "/",
+  "short_name": "Hellow",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "id": "Hello",
+  "description": "Note",
+  "lang": "zh"
+}
